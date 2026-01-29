@@ -2,7 +2,7 @@ import "dotenv/config";
 import { finalizeEvent } from "nostr-tools/pure";
 import { Relay } from "nostr-tools/relay";
 import WebSocket from "ws";
-import { createClient } from "@google/genai";
+import { GoogleGenAI } from "@google/genai"; // Sesuai dokumentasi baru
 import { webcrypto } from "node:crypto";
 
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -22,24 +22,22 @@ const privateKeyHex = process.env.NOSTR_SK;
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const privateKeyBytes = hexToBytes(privateKeyHex);
 
-const client = createClient({ apiKey: geminiApiKey });
+// Inisialisasi sesuai Dokumentasi Resmi 2026
+const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
 async function generateAIContent() {
     try {
-        // Menggunakan SDK versi GA terbaru
-        const result = await client.models.generateContent({
+        // Menggunakan model gemini-2.0-flash sesuai dokumen
+        const response = await ai.models.generateContent({
             model: "gemini-2.0-flash",
-            contents: [{
-                role: "user",
-                parts: [{ text: "Generate a short, poetic GM for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes." }]
-            }]
+            contents: "Generate a short, poetic Good Morning for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes."
         });
 
-        // SDK baru menggunakan result.response.text()
-        return result.value.content.parts[0].text.trim();
+        // Di SDK baru, response.text adalah properti (bukan fungsi)
+        return response.text.trim();
     } catch (error) {
         console.error("AI Error:", error.message);
-        return "GM ☕. #nostr";
+        return "GM ☕. Building in public, one block at a time.";
     }
 }
 
