@@ -5,7 +5,6 @@ import WebSocket from 'ws';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { webcrypto } from 'node:crypto';
 
-// Perbaikan untuk error "crypto.getRandomValues must be defined"
 if (!globalThis.crypto) {
   globalThis.crypto = webcrypto;
 }
@@ -13,7 +12,6 @@ if (!globalThis.crypto) {
 global.WebSocket = WebSocket;
 
 function hexToBytes(hex) {
-  if (typeof hex !== 'string') throw new TypeError('Hex must be a string');
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
@@ -29,25 +27,17 @@ const genAI = new GoogleGenerativeAI(geminiApiKey);
 
 async function generateAIContent() {
   try {
-    // Kembali ke model paling pertama (terbaru)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    
-    const prompt = `
-      Generate a unique "Good Morning" (GM) post for Nostr.
-      Persona: A writer who loves Bitcoin and coffee on nostr.
-      Constraints: English, one short sentence, witty or poetic. No quotes.
-    `;
+    // Pakai 1.5 flash supaya TIDAK kena Quota Exceeded 429
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Generate a short "Good Morning" for Nostr. Persona: Writer, Bitcoin, Coffee. English, one short sentence.`;
     
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
+    return result.response.text().trim().replace(/"/g, '');
   } catch (error) {
     console.error("AI Error:", error.message);
-    // Fallback teks yang keren kalau AI lagi sibuk
     return "GM ☕. Building in public, one block at a time."; 
   }
 }
-
 
 async function postGM() {
   const content = await generateAIContent();
@@ -57,15 +47,18 @@ async function postGM() {
     'wss://relay.damus.io',
     'wss://relay.primal.net',
     'wss://nos.lol',
-    'wss://nostr-01.yakihonne.com'
+    'wss://relay.nostr.band'
   ];
 
-  const event = finalizeEvent({
+  // Pastikan semua properti lengkap agar tidak error serialize
+  const eventTemplate = {
     kind: 1,
     created_at: Math.floor(Date.now() / 1000),
-    tags: ['nostr','bitcoin'],
+    tags: [],
     content: content,
-  }, privateKeyBytes);
+  };
+
+  const event = finalizeEvent(eventTemplate, privateKeyBytes);
 
   for (const url of relays) {
     try {
