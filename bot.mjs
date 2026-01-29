@@ -30,7 +30,7 @@ const genAI = new GoogleGenerativeAI(geminiApiKey);
 async function generateAIContent() {
   try {
     // Ganti ke gemini-1.5-flash agar lebih aman dari limit kuota
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     const prompt = `
       Generate a very short, casual "Good Morning" (GM) for Nostr.
       Context: Writer, Bitcoin fan, coffee lover. 
