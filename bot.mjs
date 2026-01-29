@@ -1,14 +1,18 @@
 import "dotenv/config";
 import { finalizeEvent } from "nostr-tools/pure";
 import { Relay } from "nostr-tools/relay";
+import { hexToBytes } from "@noble/hashes/utils"; // Tambahkan import ini
 import WebSocket from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 global.WebSocket = WebSocket;
 
 // --- KONFIGURASI ---
-const privateKey = process.env.NOSTR_SK;
+const privateKeyHex = process.env.NOSTR_SK;
 const geminiApiKey = process.env.GEMINI_API_KEY;
+
+// Konversi Hex ke Uint8Array agar tidak error "expected Uint8Array"
+const privateKeyBytes = hexToBytes(privateKeyHex);
 
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 
@@ -41,6 +45,7 @@ async function postGM() {
         "wss://nostr-01.yakihonne.com"
     ];
 
+    // Gunakan privateKeyBytes (Uint8Array) di sini
     const event = finalizeEvent(
         {
             kind: 1,
@@ -48,7 +53,7 @@ async function postGM() {
             tags: [],
             content: content
         },
-        privateKey
+        privateKeyBytes
     );
 
     for (const url of relays) {
