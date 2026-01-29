@@ -1,17 +1,28 @@
 import "dotenv/config";
 import { finalizeEvent } from "nostr-tools/pure";
 import { Relay } from "nostr-tools/relay";
-import { hexToBytes } from "@noble/hashes/utils"; // Tambahkan import ini
 import WebSocket from "ws";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 global.WebSocket = WebSocket;
 
+// --- FUNGSI KONVERSI MANUAL (Agar tidak error import) ---
+function hexToBytes(hex) {
+    if (typeof hex !== "string") throw new TypeError("Hex must be a string");
+    if (hex.length % 2 !== 0)
+        throw new RangeError("Hex must have an even length");
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+    }
+    return bytes;
+}
+
 // --- KONFIGURASI ---
 const privateKeyHex = process.env.NOSTR_SK;
 const geminiApiKey = process.env.GEMINI_API_KEY;
 
-// Konversi Hex ke Uint8Array agar tidak error "expected Uint8Array"
+// Konversi Hex ke Uint8Array
 const privateKeyBytes = hexToBytes(privateKeyHex);
 
 const genAI = new GoogleGenerativeAI(geminiApiKey);
@@ -28,24 +39,23 @@ async function generateAIContent() {
         const response = await result.response;
         return response.text().trim();
     } catch (error) {
+        console.error("AI Error:", error);
         return "GM ☕ #nostr";
     }
 }
 
 async function postGM() {
     const content = await generateAIContent();
-    console.log("Content:", content);
+    console.log("Content generated:", content);
 
     const relays = [
         "wss://relay.damus.io",
         "wss://relay.primal.net",
         "wss://bitcoiner.social",
-        "wss://relay.nostr.band",
         "wss://nos.lol",
         "wss://nostr-01.yakihonne.com"
     ];
 
-    // Gunakan privateKeyBytes (Uint8Array) di sini
     const event = finalizeEvent(
         {
             kind: 1,
@@ -55,6 +65,8 @@ async function postGM() {
         },
         privateKeyBytes
     );
+
+    console.log("Event signed, publishing...");
 
     for (const url of relays) {
         try {
