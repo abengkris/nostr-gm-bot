@@ -27,4 +27,4 @@ jobs:
         env:
           NOSTR_SK: ${{ secrets.NOSTR_SK }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: node bot.js
+        run: node bot.mjs
