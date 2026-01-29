@@ -29,21 +29,25 @@ const genAI = new GoogleGenerativeAI(geminiApiKey);
 
 async function generateAIContent() {
   try {
-    // Ganti ke gemini-1.5-flash agar lebih aman dari limit kuota
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    // Kembali ke model paling pertama (terbaru)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    
     const prompt = `
-      Generate a very short, casual "Good Morning" (GM) for Nostr.
-      Context: Writer, Bitcoin fan, coffee lover. 
-      English, 1 short sentence, no quotes.
+      Generate a unique "Good Morning" (GM) post for Nostr.
+      Persona: A writer who loves Bitcoin and coffee on nostr.
+      Constraints: English, one short sentence, witty or poetic. No quotes.
     `;
+    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text().trim();
   } catch (error) {
     console.error("AI Error:", error.message);
-    return "GM ☕ Wishing you a day of high signal and low time preference."; 
+    // Fallback teks yang keren kalau AI lagi sibuk
+    return "GM ☕. Building in public, one block at a time."; 
   }
 }
+
 
 async function postGM() {
   const content = await generateAIContent();
@@ -52,7 +56,6 @@ async function postGM() {
   const relays = [
     'wss://relay.damus.io',
     'wss://relay.primal.net',
-    'wss://bitcoiner.social',
     'wss://nos.lol',
     'wss://nostr-01.yakihonne.com'
   ];
@@ -60,7 +63,7 @@ async function postGM() {
   const event = finalizeEvent({
     kind: 1,
     created_at: Math.floor(Date.now() / 1000),
-    tags: [],
+    tags: ['nostr','bitcoin'],
     content: content,
   }, privateKeyBytes);
 
