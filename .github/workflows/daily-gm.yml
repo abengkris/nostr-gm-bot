@@ -2,26 +2,25 @@ name: Daily GM Bot
 
 on:
   schedule:
-    # Jalan setiap jam 00:00 UTC (07:00 WIB)
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # Setiap jam 07:00 WIB
+  workflow_dispatch: # Supaya bisa klik tombol "Run" manual
 
 jobs:
-  post-gm:
+  run-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22' # Paksa pakai Node 22 agar kompatibel dengan @google/genai
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-           npm config set @jsr:registry=https://npm.jsr.io
-           npm install
+          npm config set @jsr:registry=https://npm.jsr.io
+          npm install
 
       - name: Run Bot
         env:
