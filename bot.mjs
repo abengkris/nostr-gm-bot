@@ -2,13 +2,13 @@ import "dotenv/config";
 import { finalizeEvent } from "nostr-tools/pure";
 import { Relay } from "nostr-tools/relay";
 import WebSocket from "ws";
-import { GoogleGenAI } from "@google/genai"; // Sesuai dokumentasi baru
+import { GoogleGenAI } from "@google/genai";
 import { webcrypto } from "node:crypto";
 
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 global.WebSocket = WebSocket;
 
-// --- KONVERSI HEX ---
+// --- HEX CONVERTION---
 function hexToBytes(hex) {
     const bytes = new Uint8Array(hex.length / 2);
     for (let i = 0; i < bytes.length; i++) {
@@ -17,27 +17,25 @@ function hexToBytes(hex) {
     return bytes;
 }
 
-// --- KONFIGURASI ---
+// --- CONFIGURATION ---
 const privateKeyHex = process.env.NOSTR_SK;
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const privateKeyBytes = hexToBytes(privateKeyHex);
 
-// Inisialisasi sesuai Dokumentasi Resmi 2026
+// ——— INITIALIZATION ---
 const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
 async function generateAIContent() {
     try {
-        // Menggunakan model gemini-2.0-flash sesuai dokumen
         const response = await ai.models.generateContent({
             model: "gemini-2.0-flash",
             contents: "Generate a short, poetic Good Morning for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes."
         });
 
-        // Di SDK baru, response.text adalah properti (bukan fungsi)
         return response.text.trim();
     } catch (error) {
         console.error("AI Error:", error.message);
-        return "GM ☕. Building in public, one block at a time.";
+        return "GM ☕ #nostr";
     }
 }
 
