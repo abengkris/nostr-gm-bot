@@ -50,7 +50,7 @@ Test the bot locally:
 
 ## 🤖 Automation Workflow
 The bot uses a GitHub Actions workflow (.github/workflows/daily-gm.yml) with the following schedule:
-- **Cron**: 0 0 * * * (Daily at 07:00 AM WIB).
+- **Cron**: 0 7 * * * (Daily at 07:00 AM UTC).
 - **Environment**: Ubuntu-latest with Node.js 22.
 
 ## 📜 License
