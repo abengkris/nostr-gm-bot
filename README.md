@@ -32,7 +32,7 @@ Test the bot locally:
    cd nostr-gm-bot
    ```
 2. **Install dependencies**:
-   ``` bash
+   ```bash
    npm install
    ```
 
@@ -43,7 +43,7 @@ Test the bot locally:
    GEMINI_API_KEY=your_gemini_api_key
    ```
 
-4. ***Run the bot***:
+4. **Run the bot**:
    ```bash
    node bot.mjs
    ```
