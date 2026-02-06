@@ -35,7 +35,7 @@ async function generateAIContent() {
         return response.text.trim();
     } catch (error) {
         console.error("AI Error:", error.message);
-        return "GM ☕ #nostr stay humble and stack sats ⚡ $boost #followers";
+        return "GM ☕ #nostr";
     }
 }
 
