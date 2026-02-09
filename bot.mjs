@@ -28,7 +28,7 @@ const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 async function generateAIContent() {
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash-lite",
             contents: "Generate a short, poetic Good Morning for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes."
         });
 
