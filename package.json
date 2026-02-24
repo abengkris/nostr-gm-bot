@@ -1,15 +1,20 @@
 {
   "name": "gmbot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Nostr Daily GM Bot powered by Google Gemini",
+  "main": "bot.mjs",
+  "type": "module",
   "scripts": {
+    "start": "node bot.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "nostr",
+    "gemini",
+    "bot"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@google/genai": "^1.38.0",
     "dotenv": "^17.2.3",

@@ -8,31 +8,20 @@ import { webcrypto } from "node:crypto";
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 global.WebSocket = WebSocket;
 
-// --- HEX CONVERTION---
-function hexToBytes(hex) {
-    const bytes = new Uint8Array(hex.length / 2);
-    for (let i = 0; i < bytes.length; i++) {
-        bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
-    }
-    return bytes;
-}
-
 // --- CONFIGURATION ---
 const privateKeyHex = process.env.NOSTR_SK;
 const geminiApiKey = process.env.GEMINI_API_KEY;
-const privateKeyBytes = hexToBytes(privateKeyHex);
+const privateKeyBytes = Buffer.from(privateKeyHex, "hex");
 
 // ——— INITIALIZATION ---
-const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+const ai = new GoogleGenAI(geminiApiKey);
 
 async function generateAIContent() {
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash-lite",
-            contents: "Generate a short, poetic Good Morning for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes."
-        });
-
-        return response.text.trim();
+        const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const result = await model.generateContent("Generate a short, poetic Good Morning for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes.");
+        const response = await result.response;
+        return response.text().trim();
     } catch (error) {
         console.error("AI Error:", error.message);
         return "GM ☕ #nostr";
@@ -60,16 +49,19 @@ async function postGM() {
 
     const event = finalizeEvent(eventTemplate, privateKeyBytes);
 
-    for (const url of relays) {
+    const publishPromises = relays.map(async (url) => {
         try {
             const relay = await Relay.connect(url);
             await relay.publish(event);
             console.log(`✅ Sent to ${url}`);
             relay.close();
         } catch (error) {
-            console.error(`❌ Skip ${url}`);
+            console.error(`❌ Skip ${url}: ${error.message}`);
         }
-    }
+    });
+
+    await Promise.allSettled(publishPromises);
+    process.exit(0);
 }
 
 postGM();
