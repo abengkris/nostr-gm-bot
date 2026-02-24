@@ -14,18 +14,19 @@ const geminiApiKey = process.env.GEMINI_API_KEY;
 const privateKeyBytes = Buffer.from(privateKeyHex, "hex");
 
 // ——— INITIALIZATION ---
-const ai = new GoogleGenAI(geminiApiKey);
+const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
 async function generateAIContent() {
     try {
-        const model = ai.getGenerativeModel({ 
+        const response = await ai.models.generateContent({ 
             model: "gemini-2.0-flash",
-            systemInstruction: "You are a stoic, minimalist writer. You value Bitcoin, coffee, and the quiet of the morning. Your voice is brief and profound. No fluff, no hashtags, no quotes."
+            contents: "Write a minimalist morning greeting for Nostr. 3 to 7 words. Focus on the quiet before the first block or the steam of the coffee.",
+            config: {
+                systemInstruction: "You are a stoic, minimalist writer. You value Bitcoin, coffee, and the quiet of the morning. Your voice is brief and profound. No fluff, no hashtags, no quotes."
+            }
         });
         
-        const result = await model.generateContent("Write a minimalist morning greeting for Nostr. 3 to 7 words. Focus on the quiet before the first block or the steam of the coffee.");
-        const response = await result.response;
-        return response.text().trim();
+        return response.text.trim();
     } catch (error) {
         console.error("AI Error:", error.message);
         return "GM ☕ #nostr";
