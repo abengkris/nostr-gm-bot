@@ -18,8 +18,12 @@ const ai = new GoogleGenAI(geminiApiKey);
 
 async function generateAIContent() {
     try {
-        const model = ai.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await model.generateContent("Generate a short, poetic Good Morning for Nostr. Persona: Writer, Bitcoin, Coffee. English, 1 sentence. No quotes.");
+        const model = ai.getGenerativeModel({ 
+            model: "gemini-2.0-flash",
+            systemInstruction: "You are a stoic, minimalist writer. You value Bitcoin, coffee, and the quiet of the morning. Your voice is brief and profound. No fluff, no hashtags, no quotes."
+        });
+        
+        const result = await model.generateContent("Write a minimalist morning greeting for Nostr. 3 to 7 words. Focus on the quiet before the first block or the steam of the coffee.");
         const response = await result.response;
         return response.text().trim();
     } catch (error) {
