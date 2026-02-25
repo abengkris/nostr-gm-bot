@@ -19,7 +19,7 @@ const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 async function generateAIContent() {
     try {
         const response = await ai.models.generateContent({ 
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             contents: "Write a minimalist morning greeting for Nostr. 3 to 7 words. Focus on the quiet before the first block or the steam of the coffee.",
             config: {
                 systemInstruction: "You are a stoic, minimalist writer. You value Bitcoin, coffee, and the quiet of the morning. Your voice is brief and profound. No fluff, no hashtags, no quotes."
