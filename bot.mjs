@@ -6,7 +6,15 @@ import { Relay } from "nostr-tools/relay";
 import WebSocket from "ws";
 import { GoogleGenAI } from "@google/genai";
 import { webcrypto } from "node:crypto";
-import { hexToBytes } from "@noble/hashes/utils"; 
+
+function hexToBytes(hex) {
+    if (hex.length % 2 !== 0) throw new Error("Format hex tidak valid.");
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < hex.length; i += 2) {
+        bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+    }
+    return bytes;
+}
 
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 global.WebSocket = WebSocket;
