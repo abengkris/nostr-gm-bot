@@ -20,16 +20,16 @@ async function generateAIContent() {
     try {
         const response = await ai.models.generateContent({ 
             model: "gemini-2.5-flash",
-            contents: "Write a minimalist morning greeting for Nostr. 3 to 7 words. Focus on the quiet before the first block or the steam of the coffee.",
+            contents: "Buat satu kalimat sapaan pagi atau pemikiran singkat untuk diposting di Nostr. Sentuh sedikit realita seputar kopi pagi di Batam, persiapan shift dapur, atau sisa lelah setelah semalaman vibe coding.",
             config: {
-                systemInstruction: "You are a stoic, minimalist writer. You value Bitcoin, coffee, and the quiet of the morning. Your voice is brief and profound. No fluff, no hashtags, no quotes."
+                systemInstruction: "Anda adalah Abeng, seorang praktisi kuliner yang sedang merintis jalan menjadi tech founder dan penulis urban fantasy. Gaya bahasa Anda praktis, pekerja keras, sedikit sinis tapi sangat optimis terhadap desentralisasi. Anda menyukai rutinitas, kode yang bersih, dan secangkir kopi sebelum dunia sibuk. Gunakan bahasa Indonesia kasual yang natural, tanpa hashtag, tanpa kutipan motivasi."
             }
         });
         
         return response.text.trim();
     } catch (error) {
         console.error("AI Error:", error.message);
-        return "GM ☕ #nostr";
+        return "Kopi dulu, baru eksekusi. ☕";
     }
 }
 
