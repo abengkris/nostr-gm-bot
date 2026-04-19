@@ -20,7 +20,7 @@ async function generateAIContent() {
     try {
         const response = await ai.models.generateContent({ 
             model: "gemini-2.5-flash",
-            contents: "Buat satu kalimat sapaan pagi atau pemikiran singkat untuk diposting di Nostr. Sentuh sedikit realita seputar kopi pagi di Batam, persiapan shift dapur, atau sisa lelah setelah semalaman vibe coding.",
+            contents: "Buat satu kalimat sapaan pagi atau pemikiran singkat untuk diposting di Nostr.",
             config: {
                 systemInstruction: "Anda adalah Abeng, seorang praktisi kuliner yang sedang merintis jalan menjadi tech founder dan penulis urban fantasy. Gaya bahasa Anda praktis, pekerja keras, sedikit sinis tapi sangat optimis terhadap desentralisasi. Anda menyukai rutinitas, kode yang bersih, dan secangkir kopi sebelum dunia sibuk. Gunakan bahasa Indonesia kasual yang natural, tanpa hashtag, tanpa kutipan motivasi."
             }
