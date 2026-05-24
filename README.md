@@ -1,17 +1,17 @@
 # Nostr Daily GM Bot ☕⚡
-An automated Nostr bot that generates and publishes unique, AI-powered "Good Morning" (GM) posts every day. Powered by **Google Gemini 2.0 Flash** and automated via **GitHub Actions**.
+An automated Nostr bot that generates and publishes unique, AI-powered "Good Morning" (GM) posts every day. Powered by **OpenRouter (owl-alpha)** and automated via **GitHub Actions**.
 
 ## 🚀 Features
-- **AI-Generated Content**: Uses the official Google GenAI SDK (@google/genai) to create fresh, poetic, and creative morning greetings.
+- **AI-Generated Content**: Uses OpenRouter API with the owl-alpha model to create fresh, poetic, and creative morning greetings.
 - **Fully Automated**: Runs every day at **00:00 UTC (07:00 WIB)** via GitHub Actions.
 - **Nostr Native**: Signed with Schnorr signatures and published to multiple global relays.
 - **Modern Tech Stack**: Built with Node.js 22 and ES Modules.
 - **Resilient Logic**: Features an automatic fallback mechanism to ensure your streak never breaks, even if the AI API reaches its quota.
 
 ## 🛠️ Tech Stack
-- **AI Model**: [Google Gemini 2.0 Flash](https://aistudio.google.com)
+- **AI Model**: [Owl Alpha via OpenRouter](https://openrouter.ai/models/openrouter/owl-alpha)
 - **Protocol**: [Nostr](https://github.com/nostr-protocol/nostr)
-- **SDK**: [@google/genai](https://www.npmjs.com/package/@google/genai)
+- **API**: [OpenRouter](https://openrouter.ai)
 - **Nostr Library**: [nostr-tools](https://github.com/nbd-wtf/nostr-tools)
 - **Automation**: GitHub Actions
 - **Environment**: Node.js 22
@@ -22,7 +22,7 @@ An automated Nostr bot that generates and publishes unique, AI-powered "Good Mor
 | Secret Name | Description |
 | ------- | ------ |
 | NOSTR_SK | Your Nostr Private Key in **HEX** format. |
-| GEMINI_API_KEY | Your API Key from Google AI Studio. |
+| OPENROUTER_API_KEY | Your API Key from [OpenRouter](https://openrouter.ai/keys). |
 
 ## 📦 Installation & Local Development
 Test the bot locally:
@@ -40,7 +40,7 @@ Test the bot locally:
    Create a .env file in the root directory:
    ```bash
    NOSTR_SK=your_hex_private_key
-   GEMINI_API_KEY=your_gemini_api_key
+   OPENROUTER_API_KEY=your_openrouter_api_key
    ```
 
 4. **Run the bot**:

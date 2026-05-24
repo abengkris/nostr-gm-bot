@@ -4,7 +4,6 @@ import "dotenv/config";
 import { finalizeEvent } from "nostr-tools/pure";
 import { Relay } from "nostr-tools/relay";
 import WebSocket from "ws";
-import { GoogleGenAI } from "@google/genai";
 import { webcrypto } from "node:crypto";
 
 function hexToBytes(hex) {
@@ -21,15 +20,16 @@ global.WebSocket = WebSocket;
 
 // --- CONFIGURATION & VALIDATION ---
 const privateKeyHex = process.env.NOSTR_SK;
-const geminiApiKey = process.env.GEMINI_API_KEY;
+const openrouterApiKey = process.env.OPENROUTER_API_KEY;
+const model = "openrouter/owl-alpha";
 
-if (!privateKeyHex || !geminiApiKey) {
-    console.error("❌ Error: NOSTR_SK atau GEMINI_API_KEY belum terdefinisi.");
+if (!privateKeyHex || !openrouterApiKey) {
+    console.error("❌ Error: NOSTR_SK atau OPENROUTER_API_KEY belum terdefinisi.");
     process.exit(1);
 }
 
 const privateKeyBytes = hexToBytes(privateKeyHex);
-const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 // --- UTILITIES ---
 const withTimeout = (promise, ms) => {
@@ -54,18 +54,43 @@ async function getLiveBitcoinPrice() {
 // --- CORE LOGIC ---
 async function generateAIContent() {
     const btcPrice = await getLiveBitcoinPrice();
-    const dynamicContent = `Buat satu kalimat sapaan pagi atau pemikiran singkat untuk diposting di Nostr. Sentuh sedikit realita seputar kopi pagi. Konteks live pagi ini: Harga Bitcoin ada di ${btcPrice}. Jadikan info live ini sebagai referensi halus, jangan terlihat seperti bot pelapor harga.`;
+
+    const systemPrompt = `You are a stoic, minimalist writer. You value Bitcoin, coffee, and the quiet of the early morning in Indonesia. Your voice is brief and profound — like a haiku carved from stone. No fluff, no hashtags, no emoji except ☕ or ₿ when it fits. The world hasn't woken up yet and that's exactly how you like it. Write in Indonesian or English — whichever feels more like morning dew.`;
+
+    const userPrompt = `Write a minimalist morning greeting for Nostr. 3 to 12 words. Focus on the quiet before the first block, the steam of the coffee, or the stillness of dawn. Make it feel like a secret shared between two people who get it. Live context: Bitcoin is at ${btcPrice} this morning. Weave it in subtly, naturally — don't sound like a ticker bot.`;
+
+    const payload = {
+        model: model,
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+        ],
+        max_tokens: 60,
+        temperature: 0.8,
+    };
 
     try {
-        const response = await ai.models.generateContent({ 
-            model: "gemini-2.5-flash",
-            contents: dynamicContent,
-            config: {
-                systemInstruction: "Anda adalah Abeng, seorang praktisi kuliner yang sedang merintis jalan menjadi tech founder dan penulis urban fantasy. Gaya bahasa Anda praktis, pekerja keras, sedikit sinis tapi sangat optimis terhadap desentralisasi. Anda menyukai rutinitas, kode yang bersih, dan secangkir kopi sebelum dunia sibuk. Gunakan bahasa Indonesia kasual yang natural, tanpa hashtag, tanpa kutipan motivasi."
-            }
+        const response = await fetch(OPENROUTER_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${openrouterApiKey}`,
+            },
+            body: JSON.stringify(payload),
         });
 
-        return response.text.trim();
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`OpenRouter ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.choices || data.choices.length === 0) {
+            throw new Error("No choices returned from OpenRouter");
+        }
+
+        return data.choices[0].message.content.trim();
     } catch (error) {
         console.error("❌ AI Error:", error.message);
         return "Kopi dulu, baru eksekusi. ☕";
@@ -95,21 +120,19 @@ async function postGM() {
     const event = finalizeEvent(eventTemplate, privateKeyBytes);
 
     const publishPromises = relays.map(async (url) => {
-        let relay;
         try {
-            relay = await withTimeout(Relay.connect(url), 5000);
-            await withTimeout(relay.publish(event), 5000);
-            console.log(`✅ Tersampaikan ke ${url}`);
+            const relay = await withTimeout(Relay.connect(url), 15000);
+            await relay.publish(event);
+            console.log(`✅ Sent to ${url}`);
+            relay.close();
         } catch (error) {
-            console.error(`❌ Dilewati ${url}: ${error.message}`);
-        } finally {
-            if (relay) relay.close();
+            console.error(`❌ Skip ${url}: ${error.message}`);
         }
     });
 
-    await Promise.allSettled(publishPromises);
-    
-    console.log("Operasi selesai. Mengakhiri proses.");
+    const results = await Promise.allSettled(publishPromises);
+    const successCount = results.filter(r => r.status === "fulfilled").length;
+    console.log(`Selesai: ${successCount}/${relays.length} relay berhasil.`);
     process.exit(0);
 }
 
